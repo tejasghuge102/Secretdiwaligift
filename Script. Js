@@ -1,0 +1,117 @@
+// 10 संभावित परिणाम: 7 बार चॉकलेट, 3 बार अन्य
+const allPossibleOutcomes = [
+    'Chocolate Bar 🍫', // 1
+    'Chocolate Bar 🍫', // 2
+    'Chocolate Bar 🍫', // 3
+    'Chocolate Bar 🍫', // 4
+    'Chocolate Bar 🍫', // 5
+    'Chocolate Bar 🍫', // 6
+    'Chocolate Bar 🍫', // 7 (Maximum Chocolate chance)
+    '₹100 Cash Prize! 💰', // 8
+    'Big Snack Hamper! 🍿', // 9
+    'A Special Diwali Lamp! 🪔' // 10
+];
+
+// Game Variables
+let shuffledGiftMap = {}; 
+
+// Select HTML elements
+const idField = document.querySelector('.idField');
+const guessField = document.querySelector('.guessField');
+const checkGiftSubmit = document.querySelector('.checkGiftSubmit');
+const resultText = document.querySelector('.resultText');
+const shuffleAndPlayButton = document.querySelector('.shuffleAndPlay');
+
+// --- Shuffle Function (Fisher-Yates Algorithm) ---
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// --- Generate Gift Map Function ---
+function generateShuffledGiftMap() {
+    const shuffledOutcomes = shuffleArray([...allPossibleOutcomes]);
+    const newMap = {};
+    for (let i = 0; i < 10; i++) {
+        newMap[i + 1] = shuffledOutcomes[i];
+    }
+    shuffledGiftMap = newMap;
+    
+    // यह कंसोल में शफ़ल्ड मैप दिखाता है, जो केवल आपको (डेवलपर को) दिखाई देगा।
+    console.log("--- New Gift Map Generated (Secret) ---");
+    console.log(shuffledGiftMap);
+    console.log("-----------------------------------------");
+}
+
+// --- Check Gift Function ---
+function checkGift() {
+    const playerID = idField.value.trim();
+    const userGuess = Number(guessField.value);
+
+    if (playerID === "") {
+        resultText.textContent = 'Please enter your Player ID first!';
+        resultText.style.backgroundColor = '#f8d7da';
+        return;
+    }
+
+    if (userGuess >= 1 && userGuess <= 10) {
+        const secretGift = shuffledGiftMap[userGuess];
+        
+        // **SECRET LOGGING - यह केवल कंसोल (F12) में दिखेगा**
+        const secretMessage = `Player ID: ${playerID} | Guessed Number: ${userGuess} | WON: ${secretGift}`;
+        console.log("!!! WINNER LOGGED !!!");
+        console.log(secretMessage);
+        
+        // **PUBLIC MESSAGE - यह यूज़र को दिखेगा**
+        resultText.textContent = `Thank you, ${playerID}! Your ticket is recorded. Happy Diwali! 🪔`;
+        resultText.style.backgroundColor = '#e6ffe6';
+        resultText.style.color = '#ff4500';
+
+        // Disable inputs and show Play Again button
+        idField.disabled = true;
+        guessField.disabled = true;
+        checkGiftSubmit.disabled = true;
+        shuffleAndPlayButton.style.display = 'block';
+
+    } else {
+        resultText.textContent = 'Please enter a valid number between 1 and 10.';
+        resultText.style.backgroundColor = '#f8d7da';
+        resultText.style.color = '#721c24';
+    }
+}
+
+// --- Reset Game Function ---
+function resetGame() {
+    generateShuffledGiftMap();
+    
+    // Re-enable inputs
+    idField.disabled = false;
+    guessField.disabled = false;
+    checkGiftSubmit.disabled = false;
+    
+    // Reset text and buttons
+    guessField.value = '';
+    resultText.textContent = '';
+    resultText.style.backgroundColor = 'transparent';
+    resultText.style.color = '#333';
+    shuffleAndPlayButton.style.display = 'none';
+
+    idField.focus();
+}
+
+// --- Event Listeners ---
+checkGiftSubmit.addEventListener('click', checkGift);
+
+guessField.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        checkGift();
+    }
+});
+
+shuffleAndPlayButton.addEventListener('click', resetGame);
+
+// --- Initialize Game ---
+window.onload = resetGame;
